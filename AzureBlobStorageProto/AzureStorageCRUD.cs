@@ -7,6 +7,7 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System.Configuration;
+using System.IO;
 
 namespace AzureBlobStorageProto
 {
@@ -17,7 +18,7 @@ namespace AzureBlobStorageProto
         public AzureStorageCRUD()
         {
             // Retrieve storage account from connection string.
-            var storageAccount = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["StorageConnectionString"]);
+            var storageAccount = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["StorageConnectionStringDevHb"]);
 
             // Create the blob client.
             blobClient = storageAccount.CreateCloudBlobClient();
@@ -47,6 +48,18 @@ namespace AzureBlobStorageProto
 
             return blockBlob;
         }
-        
+
+
+        internal string DownloadFile(CloudBlobContainer container, string blobName)
+        {
+            // Retrieve reference to a blob with given blob name
+            CloudBlockBlob blockBlob2 = container.GetBlockBlobReference(blobName);
+
+            using (var memoryStream = new MemoryStream())
+            {
+                blockBlob2.DownloadToStream(memoryStream);
+                return Encoding.UTF8.GetString(memoryStream.ToArray());
+            }
+        }
     }
 }
